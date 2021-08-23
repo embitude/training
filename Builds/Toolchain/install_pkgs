@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Install build essentials
+if [ `lsb_release -si` == "Ubuntu" ]
+then
+	sudo apt-get install build-essential
+else # Assuming CentOS
+	sudo yum install gcc make
+fi
