@@ -1,0 +1,94 @@
+Character Driver Registration & De-registration
+-----------------------------------------------
+#include <linux/fs.h>
+int alloc_chrdev_region(dev_t *, unsigned first_minor, unsigned minor_count, const char *);
+int register_chrdev_region(dev_t, unsigned, const char *);
+void unregister_chrdev_region(dev_t, unsigned);
+
+Registering file operations
+---------------------------
+#include <linux/cdev.h>
+void cdev_init(struct cdev *, const struct file_operations *fops);
+int cdev_add(struct cdev *, dev_t, unsigned minor_count);
+
+Exchanging the data with user space
+-----------------------------------
+static copy_to_user(void __user *to, const void *from, unsigned long n);
+static copy_from_user(void *to, const void __user *from, unsigned long n);
+
+Automatic device file creation
+------------------------------
+include <linux/device.h>
+class_create(owner, name) /* macro which returns the pointer to the struct class */
+void class_destroy(struct class *cls);
+
+struct device *device_create(struct class *cls, struct device *parent,vdev_t devt, 
+								void *drvdata, const char *fmt, ...);
+void device_destroy(struct class *cls, dev_t devt);
+
+Setting & Getting the gpio status
+---------------------------------
+#include <linux/gpio.h>
+void gpio_set_value(unsigned int gpio, int value)
+int gpio_get_value(unsigned int gpio)
+
+IOCTL
+-----
+#define _IO(type,nr)
+#define _IOR(type,nr,size)
+#define _IOW(type,nr,size)
+#define _IOWR(type,nr,size)
+
+Synchronization Mechanisms
+--------------------------
++ Mutex
+#include <linux/mutex.h>
+struct mutex my_mutex;
+DEFINE_MUTEX(my_mutex)
+
+mutex_int(struct mutex *)
+mutex_lock(struct mutex *my_mutex)
+int mutex_lock_interruptible(struct mutex *my_mutex)
+mutex_unlock(struct mutex *my_mutex)
+
++ Semaphore
+#include <linux/semaphore.h>
+struct semaphore my_sem;
+DEFINE_SEMAPHORE(my_sem)
+void sema_init(struct semaphore *sem, int val)
+
+void down(struct semaphore *sem)
+int down_interruptible(struct semaphore *sem)
+void up(struct semaphore *sem);
+
++ Spinlocks
+#include <linux/spinlock.h>
+Type: spinlock_t
+
+spin_lock_init(struct spinlock_t *)
+spin_lock(struct spinlock_t *)
+spin_unlock(struct spinloc_t *)
+
+
+Basic APIs to block/unblock the process
+---------------------------------------
+#include <sched.h>
+
+void schedule(void);
+set_current_state(state_value) (Macro)
+int wake_up_process(struct task_struct *t)
+
+WaitQueue APIs
+--------------
+#include <linux/wait.h>
+
+wait_queue_head_t (Datastructure for waitqueue)
+
+void init_waitqueue_head(wait_queue_head_t wq_head) (Macro)
+DECLARE_WAIT_QUEUE_HEAD(wq_head_name)
+
+int wait_event_interruptible(wait_queue_head_t wq_head, bool condition)  (The parameter 'condition' signifies the wake-up condition such as 'flag == y')
+int wait_interruptible_timeout(wq_head, condition, timeout)
+
+void wake_up(&wq_head);
+
