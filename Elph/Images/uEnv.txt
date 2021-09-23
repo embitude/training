@@ -1,0 +1,7 @@
+ramroot=/dev/ram0 rw ramdisk_size=16384 initrd=0x84000000,16M
+ramrootfstype=ext2
+ramboot=setenv bootargs console=ttyS0,115200n8 root=${ramroot} rootfstype=${ramrootfstype}
+loadrd=fatload mmc ${mmcdev}:${mmcpart} 0x84000000 rd-ext2.bin;
+loadzimage=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} zImage;
+loadfdt=fatload mmc ${mmcdev}:${mmcpart} ${fdtaddr} am335x-boneblack.dtb;
+uenvcmd=run loadrd; run loadzimage; run loadfdt; run ramboot; bootz ${loadaddr} - ${fdtaddr};

@@ -1,0 +1,3 @@
+ramboot=setenv bootargs console=ttyS0,115200n8 root=/dev/ram0 rw ramdisk_size=16384 initrd=0x84000000,16M rootfstype=ext2
+uenvcmd=run ramboot;tftpboot 84000000 rd-ext2.bin; tftpboot 80200000 zImage; tftpboot 82000000 am335x-boneblack.dtb; bootz 0x80200000 - 0x82000000;
+
