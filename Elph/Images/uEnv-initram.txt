@@ -1,0 +1,4 @@
+ramboot=setenv bootargs console=ttyS0,115200n8
+loadzimage=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} zImage;
+loadfdt=fatload mmc ${mmcdev}:${mmcpart} ${fdtaddr} am335x-boneblack.dtb;
+uenvcmd=run loadzimage; run loadfdt; run ramboot; bootz ${loadaddr} - ${fdtaddr};

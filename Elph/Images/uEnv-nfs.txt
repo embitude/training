@@ -1,0 +1,4 @@
+nfsboot=setenv bootargs root=/dev/nfs rw ip=192.168.7.2:::::usb0 console=ttyS0,115200n8 g_ether.dev_addr=f8:dc:7a:00:00:02 g_ether.host_addr=f8:dc:7a:00:00:01 nfsroot=192.168.7.3:<path_to_nfs_rootfs>,nfsvers=3,tcp
+loadzimage=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} zImage;
+loadfdt=fatload mmc ${mmcdev}:${mmcpart} ${fdtaddr} am335x-boneblack.dtb;
+uenvcmd=run loadzimage; run loadfdt; run nfsboot; bootz ${loadaddr} - ${fdtaddr};
