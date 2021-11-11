@@ -1,0 +1,92 @@
+Platform Drivers related APIs
+-----------------------------
+include/linux/platform_device.h
+
+struct platform_driver {
+        int (*probe)(struct platform_device *);
+        int (*remove)(struct platform_device *);
+        void (*shutdown)(struct platform_device *);
+        int (*suspend)(struct platform_device *, pm_message_t state);
+        int (*resume)(struct platform_device *);
+        struct device_driver driver;
+        const struct platform_device_id *id_table;
+        bool prevent_deferred_probe;
+}; 
+
+int platform_driver_register(struct platform_driver *pl_driver);
+void platform_driver_unregister(struct platform_driver *);
+
+int platform_device_register(struct platform_device *)
+
+struct platform_device *platform_device_register_simple(
+                const char *name, int id,
+                const struct resource *res, unsigned int num)
+void platform_device_unregister(struct platform_device *);
+
+
+
+ALSA Driver APIs
+----------------
+include/sound/core.h
+int snd_card_new(struct device *parent, int idx, const char *xid,
+         struct module *module, int extra_size,
+         struct snd_card **card_ret)
+int snd_card_register(struct snd_card *);
+int snd_card_free(struct snd_card *card)
+
+include/sound/pcm.h
+int snd_pcm_new(struct snd_card *card, const char *id, int device,
+        int playback_count, int capture_count,
+        struct snd_pcm **rpcm)
+void snd_pcm_set_ops(struct snd_pcm * pcm, int direction,
+             const struct snd_pcm_ops *ops);
+struct snd_pcm_ops {
+    int (*open)(struct snd_pcm_substream *substream);
+    int (*close)(struct snd_pcm_substream *substream);
+    int (*ioctl)(struct snd_pcm_substream * substream,
+             unsigned int cmd, void *arg);
+    int (*hw_params)(struct snd_pcm_substream *substream,
+             struct snd_pcm_hw_params *params);
+    int (*hw_free)(struct snd_pcm_substream *substream);
+    int (*prepare)(struct snd_pcm_substream *substream);
+    int (*trigger)(struct snd_pcm_substream *substream, int cmd);
+    snd_pcm_uframes_t (*pointer)(struct snd_pcm_substream *substream);
+    int (*get_time_info)(struct snd_pcm_substream *substream,
+            struct timespec *system_ts, struct timespec *audio_ts,
+            struct snd_pcm_audio_tstamp_config *audio_tstamp_config,
+            struct snd_pcm_audio_tstamp_report *audio_tstamp_report);
+    int (*fill_silence)(struct snd_pcm_substream *substream, int channel,
+                unsigned long pos, unsigned long bytes);
+    int (*copy_user)(struct snd_pcm_substream *substream, int channel,
+             unsigned long pos, void __user *buf,
+             unsigned long bytes);
+    int (*copy_kernel)(struct snd_pcm_substream *substream, int channel,
+               unsigned long pos, void *buf, unsigned long bytes);
+    struct page *(*page)(struct snd_pcm_substream *substream,
+                 unsigned long offset);
+    int (*mmap)(struct snd_pcm_substream *substream, struct vm_area_struct *vma);
+    int (*ack)(struct snd_pcm_substream *substream);
+};
+
+Allocate the pages
+int snd_pcm_lib_preallocate_pages_for_all(struct snd_pcm *pcm,
+                      int type, void *data,
+                      size_t size, size_t max);
+int snd_pcm_lib_malloc_pages(struct snd_pcm_substream *substream, size_t size);
+int snd_pcm_lib_free_pages(struct snd_pcm_substream *substream);
+
+Period Elapsed
+--------------
+void snd_pcm_period_elapsed(struct snd_pcm_substream *substream);
+
+Frames <-> bytes conversion
+---------------------------
+ssize_t frames_to_bytes(struct snd_pcm_runtime *runtime, snd_pcm_sframes_t size)
+snd_pcm_sframes_t bytes_to_frames(struct snd_pcm_runtime *runtime, ssize_t size)
+
+Timer APIs
+----------
+#include <linux/timer.h>
+timer_setup(struct timer_list *, callback, flags);
+int mod_timer(struct timer_list *timer, unsigned long expires);
+
