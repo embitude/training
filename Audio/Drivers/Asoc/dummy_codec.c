@@ -4,25 +4,11 @@
 
 #include <sound/soc.h>
 
+//TODO 1.4: Populate the snd_soc_dai_driver structure
+//Populate the .name, .playback and .capture
+//For playback & capture, populate .channels_min, .channels_max
+//.rates, .formats
 static struct snd_soc_dai_driver dummy_dai = {
-	.name = "dummy-hifi",
-	.playback = {
-		.channels_min = 2,
-		.channels_max = 2,
-		.rates = SNDRV_PCM_RATE_8000_192000,
-		.formats = SNDRV_PCM_FMTBIT_S16_LE |
-			   SNDRV_PCM_FMTBIT_S24_LE |
-			   SNDRV_PCM_FMTBIT_S32_LE
-	},
-	.capture = {
-		.stream_name = "Capture",
-		.channels_min = 1,
-		.channels_max = 2,
-		.rates = SNDRV_PCM_RATE_8000_192000,
-		.formats = SNDRV_PCM_FMTBIT_S16_LE |
-			SNDRV_PCM_FMTBIT_S24_LE |
-			SNDRV_PCM_FMTBIT_S32_LE
-	},
 };
 
 static int dummy_probe(struct snd_soc_component *component)
@@ -37,9 +23,9 @@ static int dummy_set_bias_level(struct snd_soc_component *component, enum snd_so
 	return 0;
 }
 
+//TODO 1.3: Populate the snd_soc_component_driver structure
+//Initialize the set_bias_level & probe callback handlers
 static struct snd_soc_component_driver soc_component_dev_dummy = {
-	.probe			= dummy_probe,
-	.set_bias_level		= dummy_set_bias_level,
 	.idle_bias_on		= 1,
 	.use_pmdown_time	= 1,
 	.endianness		= 1,
@@ -48,21 +34,22 @@ static struct snd_soc_component_driver soc_component_dev_dummy = {
 
 static int dummy_codec_probe(struct platform_device *pdev)
 {
-	return devm_snd_soc_register_component(&pdev->dev, &soc_component_dev_dummy,
-			&dummy_dai, 1);
+	//TODO 1.5: Register the codec with devm_snd_soc_register_component
+	printk("In %s\n", __func__);
+	return 0; 
 }
-
+//TODO 1.1: Populate the of_device_id structure with compatible string
 static const struct of_device_id dummy_of_match[] = {
-	{ .compatible = "dummy-codec", },
+	{ },
 	{ }
 };
 MODULE_DEVICE_TABLE(of, dummy_of_match);
 
+//TODO 1.2: Populate the platform_driver data structure
+// Use of_match_table for binding
 static struct platform_driver dummy_codec_driver = {
-	.probe		= dummy_codec_probe,
 	.driver		= {
 		.name	= "dummy-codec",
-		.of_match_table = dummy_of_match,
 	},
 };
 

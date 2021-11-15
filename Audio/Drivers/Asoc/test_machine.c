@@ -22,48 +22,7 @@
 static int evm_dummy_hw_params(struct snd_pcm_substream *substream,
 			 struct snd_pcm_hw_params *params)
 {
-	struct snd_soc_pcm_runtime *rtd = substream->private_data;
-	struct snd_soc_dai *codec_dai = rtd->codec_dai;
-	struct snd_soc_dai *cpu_dai = rtd->cpu_dai;
-
-	struct snd_soc_card *soc_card = rtd->card;
-	struct device_node *np = soc_card->dev->of_node;
-
-	unsigned sysclk;
-	int ret = 0;
-
-	return 0;
-
-	if (np) {
-		ret = of_property_read_u32(np, "ti,codec-clock-rate", &sysclk);
-		if (ret < 0)
-			return ret;
-	}
-
-	ret = snd_soc_dai_set_fmt(codec_dai, AUDIO_FORMAT);
-	if( ret < 0 ){
-		printk( "-%s(): Codec DAI configuration error, %d\n", __FUNCTION__, ret );
-	return ret;
-	}
-
-	ret = snd_soc_dai_set_fmt(cpu_dai, AUDIO_FORMAT);
-	if( ret < 0 ){
-		printk( "-%s(): AP DAI configuration error, %d\n", __FUNCTION__, ret);
-	return ret;
-	}
-
-	printk("[%s] sysclk = %d\n", __func__, sysclk);
-
-	/* set the codec system clock */
-	ret = snd_soc_dai_set_sysclk(codec_dai, 0, sysclk, SND_SOC_CLOCK_IN);
-	if (ret < 0)
-		return ret;
-
-	/* set the CPU system clock */
-	ret = snd_soc_dai_set_sysclk(cpu_dai, 0, sysclk, SND_SOC_CLOCK_IN);
-	if (ret < 0)
-		return ret;
-
+	printk("In %s\n", __func__);
 	return 0;
 }
 static struct snd_soc_ops evm_dummy_ops = {
@@ -72,87 +31,66 @@ static struct snd_soc_ops evm_dummy_ops = {
 
 static int evm_dummy_init(struct snd_soc_pcm_runtime *rtd)
 {
-	int ret;
-	struct snd_soc_dai *codec_dai = rtd->codec_dai;
+	int ret = 0;
 	struct snd_soc_dai *cpu_dai = rtd->cpu_dai;
 
 	printk("In %s\n", __func__);
 
-	ret = snd_soc_dai_set_clkdiv(cpu_dai, 0, 1);
+	//TODO 3.1: Set the clock divider for cpu_dai. Use snd_soc_dai_set_clkdiv
 	if (ret < 0)
 		return ret;
 
-	ret = snd_soc_dai_set_clkdiv(cpu_dai, 1, 16);
+	//TODO 3.2: Set the clock direction for cpu dai. Use snd_soc_dai_set_sysclk
 	if (ret < 0)
 		return ret;
 
-	ret = snd_soc_dai_set_sysclk(cpu_dai, 0, 0, SND_SOC_CLOCK_IN);
-	if (ret < 0)
-		return ret;
-
-	ret = snd_soc_dai_set_fmt(cpu_dai, SND_SOC_DAIFMT_CBS_CFS | SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_NB_NF);
+	//TODO 3.3: Set the format for the cpu_dai 
+	//Set CPU DAI as master, I2S mode and non-inverted frame sync & bit clock
+	// Refer include/sound/soc-dai.h for available formats
 	if (ret < 0)
 		return ret;
 
 	return 0;
 }
-
+//TODO 2.4: Populate the snd_soc_dai_link
+// Populate the name, stream_name, codec_dai_name, ops, init and dai_fmt
+// DAI format as I2S mode, SoC as master
 static struct snd_soc_dai_link evm_dai_dummy = {
-	.name		= "testdia",
-	.stream_name	= "test-hifi",
-	.codec_dai_name	= "dummy-hifi",
-	.ops            = &evm_dummy_ops,
-	.init           = evm_dummy_init,
-	.dai_fmt = SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_CBS_CFS |
-		SND_SOC_DAIFMT_NB_NF,
 };
 
-static const struct of_device_id test_evm_dt_ids[] = {
-	{
-		.compatible = "test-evm-audio",
-		.data = (void *) &evm_dai_dummy,
-	},
-	
-	{ /* sentinel */ }
-};
-MODULE_DEVICE_TABLE(of, test_evm_dt_ids);
-
-/* davinci evm audio machine driver */
+//TODO 2.5: Populate the fields for snd_soc_card
+// .dai_link and num_links
 static struct snd_soc_card evm_soc_card = {
 	.owner = THIS_MODULE,
-	.dai_link = &evm_dai_dummy,
-	.num_links = 1,
 };
 
 static int test_evm_probe(struct platform_device *pdev)
 {
 	struct device_node *np = pdev->dev.of_node;
-	u32 machine_ver, clk_gpio;
+	u32 clk_gpio;
 	int ret = 0;
 
-	clk_gpio = of_get_named_gpio(np, "mcasp_clock_enable", 0);
-	if (clk_gpio < 0) {
-		dev_err(&pdev->dev, "failed to find mcasp_clock enable GPIO!\n");
-		return -EINVAL;
-	}
-	gpio_set_value(clk_gpio, 1);
-	evm_dai_dummy.codec_of_node = of_parse_phandle(np, "ti,audio-codec", 0);
+	printk("In %s\n", __func__);
+
+	//TODO 2.1: Get the audio-codec property and assign it to the codec_of_node
+	// field of evm_dai_dummy
+	// Use of_parse_phandle api
 	if (!evm_dai_dummy.codec_of_node)
 		return -EINVAL;
 
-	evm_dai_dummy.cpu_of_node = of_parse_phandle(np,
-						"ti,mcasp-controller", 0);
+	//TODO 2.2: Get the controller property and assign it to the cpu_of_node
+	// field of evm_dai_dummy
 	if (!evm_dai_dummy.cpu_of_node)
 		return -EINVAL;
 
-	evm_dai_dummy.platform_of_node = evm_dai_dummy.cpu_of_node;
+	//TODO 2.3: Assign the cpu_of_node to platform_of_node field
 
 	evm_soc_card.dev = &pdev->dev;
-	ret = snd_soc_of_parse_card_name(&evm_soc_card, "ti,model");
+	//TODO 2.6: Get the card name with snd_soc_of_parse_card_name
 	if (ret)
 		return ret;
 
-	ret = snd_soc_register_card(&evm_soc_card);
+	//TODO 2.7: Register the card with snd_soc_register_card
 	if (ret)
 		dev_err(&pdev->dev, "snd_soc_register_card failed (%d)\n", ret);
 
@@ -163,30 +101,39 @@ static int test_evm_remove(struct platform_device *pdev)
 {
 	struct snd_soc_card *card = platform_get_drvdata(pdev);
 
-	snd_soc_unregister_card(card);
+	//TODO 2.8: Unregister the card with snd_soc_register_card
 
 	return 0;
 }
 
+//TODO 1.1: Populate the platform driver structure
+// Set the compatible property to the string used in the dtb
+static const struct of_device_id test_evm_dt_ids[] = {
+	{
+	},
+	
+	{ /* sentinel */ }
+};
+MODULE_DEVICE_TABLE(of, test_evm_dt_ids);
+
+//TODO 1.2: Populate the platform driver structure
+// Populate .probe, .remove, & .of_match_table = of_match_ptr
 static struct platform_driver test_evm_driver = {
-	.probe		= test_evm_probe,
-	.remove		= test_evm_remove,
 	.driver		= {
 		.name	= "test_evm",
 		.owner	= THIS_MODULE,
-		.of_match_table = of_match_ptr(test_evm_dt_ids),
 	},
 };
 
 static int __init evm_init(void)
 {
-
-	return platform_driver_register(&test_evm_driver);
+	//TODO 1.3: Register the platform driver
+	return 0;
 }
 
 static void __exit evm_exit(void)
 {
-	platform_driver_unregister(&test_evm_driver);
+	//TODO 1.4: Unregister the platform driver
 }
 
 module_init(evm_init);
