@@ -241,3 +241,17 @@ Kcontrols
 int snd_soc_add_component_controls(struct snd_soc_component *component,
         const struct snd_kcontrol_new *controls, unsigned int num_controls)
 
+DAPM
+----
+SND_SOC_DAPM_DAC(wname, stname, wreg, wshift, winvert)
+SND_SOC_DAPM_PGA(wname, wreg, wshift, winvert, wcontrols, wncontrols)
+SND_SOC_DAPM_MIXER(wname, wreg, wshift, winvert,wcontrols, wncontrols)
+
+SND_SOC_DAPM_HP(wname, wevent)
+SND_SOC_DAPM_OUTPUT(wname)
+
+int snd_soc_dapm_new_controls(struct snd_soc_dapm_context *dapm,
+	const struct snd_soc_dapm_widget *widget,
+	int num)
+int snd_soc_dapm_add_routes(struct snd_soc_dapm_context *dapm,
+			    const struct snd_soc_dapm_route *route, int num)
